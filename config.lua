@@ -40,3 +40,6 @@ bar("top", 1,
 
 key("mod+r", function() prompt:run() end)
 
+key("g", raise("gvim", "GVIM", "5", "name"))
+
+start("gvim", "2")

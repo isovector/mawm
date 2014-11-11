@@ -12,6 +12,29 @@ html = require "markup"
 mawm = { }
 
 
+-- Setup env
+
+local function get_tag(tagid)
+    return tagid and (tags[tagid] or tags[tagid .. ":1"])
+end
+
+system = awful.util.spawn_with_shell
+
+function launch(program, tagid)
+    mawm.nextTag = get_tag(tagid)
+    awful.util.spawn(program)
+end
+
+function launch1(cmd)
+    findme = cmd
+    firstspace = cmd:find(" ")
+    if firstspace then
+        findme = cmd:sub(0, firstspace-1)
+    end
+    awful.util.spawn_with_shell("pgrep -u $USER -x " .. findme .. " > /dev/null || (" .. cmd .. ")")
+end
+
+
 function theme(theme)
     local path = string.format("%s/themes/%s/theme.lua", awful.util.getdir("config"), theme)
     beautiful.init(path)
@@ -22,6 +45,8 @@ function theme(theme)
         end
     end
 end
+
+
 
 
 modkey = "Mod4"
@@ -52,10 +77,7 @@ local function parse_shortcut(method, short, cmd)
     local canonicalName = string.lower(table.concat(mods, "+") .. "+" .. key)
 
     -- Cast the key to a number if possible
-    local keyAsNumber = tonumber(key)
-    if keyAsNumber ~= nil then
-        key = keyAsNumber
-    end
+    key = tonumber(key) or key
 
     return canonicalName, method(mods, key, cmd)
 end
@@ -143,6 +165,57 @@ awful.rules.rules = -- Default rule
 function rule()
 end
 
+mawm.nextTag = nil
+function raise(cmd, val, tagid, prop)
+    prop = prop or "class"
+
+    return function()
+        local clients = client.get()
+        local focused = awful.client.next(0)
+        local findex = 0
+        local matched_clients = {}
+        local n = 0
+
+        --make an array of matched clients
+        for i, c in pairs(clients) do
+            print "trying"
+            if c[prop] ~= val and (c[prop] == val or c[prop]:find(val)) then
+                print "got a match!"
+                n = n + 1
+                matched_clients[n] = c
+                if c == focused then
+                    findex = n
+                end
+            end
+        end
+
+        if n > 0 then
+            local c = matched_clients[1]
+            if 0 < findex and findex < n then
+                -- if the focused window matched switch focus to next in list
+                c = matched_clients[findex+1]
+            end
+
+            local ctags = c:tags()
+            if table.getn(ctags) == 0 then
+                -- ctags is empty, show client on current tag
+                local curtag = awful.tag.selected()
+                awful.client.movetotag(curtag, c)
+            else
+                -- Otherwise, pop to first tag client is visible on
+                awful.tag.viewonly(ctags[1])
+            end
+
+            -- And then focus the client
+            client.focus = c
+            c:raise()
+        else
+            launch(cmd, tagid)
+        end
+    end
+end
+
+
 
 mawm.tags = { }
 for s = 1, screen.count() do
@@ -167,12 +240,29 @@ end
 
 
 mawm.start = { }
-function start(program)
-    table.insert(mawm.start, program)
+function start(program, tagid)
+    table.insert(mawm.start, { program, tagid })
 end
 
 signal = awesome.connect_signal
 csignal = client.connect_signal
+
+-- Install tag spawning support
+mawm.clientsToSpawn = 0
+csignal("manage", function(c)
+        local tag = mawm.nextTag
+        if tag then
+            awful.client.movetotag(tag, c)
+
+            if mawm.clientsToSpawn == 0 then
+                -- suppress changing tags if we are starting up
+                awful.tag.viewonly(tag)
+            else
+                mawm.clientsToSpawn = mawm.clientsToSpawn - 1
+            end
+            mawm.nextTag = nil
+        end
+end)
 
 
 
@@ -230,6 +320,8 @@ end
 -- Finish setting up environment
 layouts = awful.layout.suit
 
+
+
 -- Include user rc
 -- require "default"
 require "config"
@@ -237,14 +329,26 @@ require "config"
 tags = { }
 for s = 1, screen.count() do
     -- TODO: use defaults here
-    tags[s] = awful.tag(mawm.tags[s], s, awful.layout.suit.tile)
+    local gentags = awful.tag(mawm.tags[s], s, awful.layout.suit.tile)
+    for i, name in ipairs(mawm.tags[s]) do
+        local id = string.format("%s:%d", name, s)
+        tags[id] = gentags[i]
+    end
 end
 
 -- Mapping installers
 root.buttons(join(mawm.gbuttons))
 root.keys(join(mawm.gkeys))
 
-for i, program in ipairs(mawm.start) do
-    awful.util.spawn_with_shell(program)
+mawm.clientsToSpawn = #mawm.start
+for i, tup in ipairs(mawm.start) do
+    local program = tup[1]
+    local tagid = tup[2]
+
+    if tag then
+        launch(program, tagid)
+    else
+        launch1(program)
+    end
 end
 

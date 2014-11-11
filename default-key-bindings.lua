@@ -5,9 +5,6 @@ key("mod+grave",      awful.tag.history.restore)
 key("alt+Left",       function() lain.util.tag_view_nonempty(-1) end)
 key("alt+Right",      function() lain.util.tag_view_nonempty(1) end)
 
--- Prompt
-key("mod+r",          function() mypromptbox[mouse.screen]:run() end)
-
 -- layout manip
 key("mod+shift+j",    function() awful.client.swap.byidx(  1)    end)
 key("mod+shift+k",    function() awful.client.swap.byidx( -1)    end)
