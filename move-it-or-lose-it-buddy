@@ -1,0 +1,4 @@
+#!/usr/bin/zsh
+
+mv awesome tmp-awesome && mv other-awesome awesome && mv tmp-awesome other-awesome
+
