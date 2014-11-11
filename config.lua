@@ -1,19 +1,41 @@
-local gears = require "gears"
+set_theme("multicolor")
 
+plugin "Paamayim/mawm-core-widgets"
 
-beautiful.init("/home/bootstrap/.config/other-awesome/themes/multicolor/theme.lua")
-gears.wallpaper.maximized("/home/bootstrap/.config/other-awesome/themes/multicolor/newwall.jpg", 1, true)
+require "default-key-bindings"
+
+layout(layouts.floating)
+layout(layouts.tile)
+layout(layouts.tile.left)
+layout(layouts.tile.bottom)
+layout(layouts.tile.top)
+layout(layouts.fair)
+layout(layouts.fair.horizontal)
+layout(layouts.spiral)
+layout(layouts.spiral.dwindle)
+layout(layouts.max)
+layout(layouts.max.fullscreen)
+layout(layouts.magnifier)
 
 modkey = "Mod4"
 
-tag("www")
+tag("1")
+tag("2")
+tag("3")
+tag("4")
+tag("5")
+tag("6")
+tag("7")
+tag("8")
+tag("9")
 
-layout(layouts.tile)
-
-key("ctrl+mod+t", awesome.restart)
-ckey("mod+ctrl+space", awful.client.floating.toggle)
-
-menu = awful.menu({ items = { { "open terminal", "terminator" } } })
+menu = awful.menu({ items = { { "open terminal", "xterm" } } })
 button(3, function() menu:toggle() end)
-cbutton(1, function(c) client.focus = c; c:raise() end)
+
+bar("top", 1,
+    -- PROMPT BOX here plox
+    { widgets.tags },
+    { widgets.tasks },
+    { widgets.systray, widgets.clock("%H:%M"), widgets.layouts }
+)
 
