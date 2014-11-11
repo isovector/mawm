@@ -1,7 +1,6 @@
 awful = require("awful")
 awful.rules = require("awful.rules")
 require "awful.autofocus"
-require "awful.widget"
 naughty = require "naughty"
 wibox = require "wibox"
 beautiful = require "beautiful"
@@ -13,7 +12,7 @@ html = require "markup"
 mawm = { }
 
 
-function set_theme(theme)
+function theme(theme)
     local path = string.format("%s/themes/%s/theme.lua", awful.util.getdir("config"), theme)
     beautiful.init(path)
 

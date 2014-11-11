@@ -1,4 +1,4 @@
-set_theme("multicolor")
+theme "multicolor"
 
 plugin "Paamayim/mawm-core-widgets"
 
@@ -33,9 +33,10 @@ menu = awful.menu({ items = { { "open terminal", "xterm" } } })
 button(3, function() menu:toggle() end)
 
 bar("top", 1,
-    -- PROMPT BOX here plox
-    { widgets.tags },
+    { widgets.tags, widgets.prompt() },
     { widgets.tasks },
     { widgets.systray, widgets.clock("%H:%M"), widgets.layouts }
 )
+
+key("mod+r", function() prompt:run() end)
 
