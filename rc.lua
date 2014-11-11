@@ -1,7 +1,14 @@
 awful = require("awful")
 awful.rules = require("awful.rules")
+require "awful.autofocus"
+naughty = require "naughty"
+wibox = require "wibox"
+beautiful = require "beautiful"
+
+
 
 mawm = { }
+
 
 function set_theme(theme)
 end
@@ -18,6 +25,8 @@ local function parse_shortcut(method, short, cmd)
 
         if token == "mod" then
             key = modkey
+        elseif token == "alt" then
+            key = "Mod1"
         elseif token == "ctrl" then
             key = "Control"
         else
@@ -36,6 +45,15 @@ local function parse_shortcut(method, short, cmd)
     end
 
     return canonicalName, method(mods, key, cmd)
+end
+
+local function join(t)
+    local result = { }
+    for k, v in pairs(t) do
+        result = awful.util.table.join(result, v)
+    end
+
+    return result
 end
 
 -- Plugins
@@ -71,7 +89,14 @@ function ckey(short, cmd)
 end
 
 
-mawm.rules = { }
+awful.rules.rules = -- Default rule
+    {   rule = { },
+        properties = {  keys = join(mawm.ckeys),
+                        buttons = join(mawm.cbuttons),
+                        focus = awful.client.focus.filter,
+                        raise = true,
+        }
+    }
 function rule()
 end
 
@@ -92,33 +117,40 @@ function stag(s, name, default)
     table.insert(mawm.tags[s], name)
 end
 
+awful.layout.layouts = { }
+function layout(which)
+    table.insert(awful.layout.layouts, which)
+end
+
+
+mawm.start = { }
+function start(program)
+    table.insert(mawm.start, program)
+end
 
 signal = awesome.connect_signal
 csignal = client.connect_signal
 
 
 
+-- Finish setting up environment
+layouts = awful.layout.suit
+
 -- Include user rc
 -- require "default"
 require "config"
 
-
--- Mapping installers
-root.buttons(mawm.gbuttons)
-root.keys(mawm.gkeys)
-
 tags = { }
 for s = 1, screen.count() do
     -- TODO: use defaults here
-    tags[s] = awful.tag(mawm.tags[s], awful.layout.suit.floating)
+    tags[s] = awful.tag(mawm.tags[s], s, awful.layout.suit.tile)
 end
 
-awful.rules.rules = awful.util.table.join(
-    {   rule = { },
-        properties = {  keys = mawm.ckeys,
-                        buttons = mawm.cbuttons
-        }
-    },
-    mawm.rules
-)
+-- Mapping installers
+root.buttons(join(mawm.gbuttons))
+root.keys(join(mawm.gkeys))
+
+for i, program in ipairs(mawm.start) do
+    awful.util.spawn_with_shell(program)
+end
 
