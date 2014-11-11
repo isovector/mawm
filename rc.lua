@@ -218,19 +218,29 @@ end
 
 
 mawm.tags = { }
+mawm.taglayouts = { }
 for s = 1, screen.count() do
     table.insert(mawm.tags, { })
+    table.insert(mawm.taglayouts, { })
 end
 
-function tag(name)
-    -- TODO(sandy): figure out how to get defaults in here
+function tag(name, default)
     for s = 1, screen.count() do
-        stag(s, name)
+        stag(s, name, default)
     end
 end
 
-function stag(s, name, default)
-    table.insert(mawm.tags[s], name)
+function stag(s, tags, default)
+    default = default or awful.layout.layouts[1] or awful.layout.suit.tile
+
+    if type(tags) ~= "table" then
+        tags = { tags }
+    end
+
+    for _, name in ipairs(tags) do
+        table.insert(mawm.tags[s], name)
+        table.insert(mawm.taglayouts[s], default)
+    end
 end
 
 awful.layout.layouts = { }
@@ -328,8 +338,7 @@ require "config"
 
 tags = { }
 for s = 1, screen.count() do
-    -- TODO: use defaults here
-    local gentags = awful.tag(mawm.tags[s], s, awful.layout.suit.tile)
+    local gentags = awful.tag(mawm.tags[s], s, mawm.taglayouts[s])
     for i, name in ipairs(mawm.tags[s]) do
         local id = string.format("%s:%d", name, s)
         tags[id] = gentags[i]
