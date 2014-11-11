@@ -1,38 +1,11 @@
-local const = mawm.constants
-local suit = awful.layout.suit
+modkey = "Mod4"
 
-mawm.config = {
-  default_mode  = "normal",
-  terminal      = "terminator",
-  city          = const.city.menlopark,
-  profile       = nil,  -- use profile_map
-  time_format   = "%a %d %b",
+tag("www")
 
-  keys = {
-    lead = "\\",
-    comm = "Mod4",
-    show = "Mod1",
-    ctrl = "Control",
-    shft = "Shift",
-  },
+menu = awful.menu({ items = { { "open terminal", "terminator" } } })
+button(3, function() menu.toggle() end)
 
-  tags = {
-    { "web",    suit.tile },
-    { "wksp1",  suit.tile },
-    { "wksp2",  suit.tile },
-    { "wksp3",  suit.tile },
-    { "tools",  suit.max  },
-    { "social", suit.fair },
-  },
+cbutton(1, function(c) client.focus = c; c:raise() end)
 
-  layouts = {
-    suit.floating,
-    suit.tile,
-    suit.fair,
-    suit.max,
-    suit.tile.bottom,
-  },
-}
-
-naughty.config.defaults.position = "bottom_right"
+awful.util.spawn_with_shell("terminator")
 
