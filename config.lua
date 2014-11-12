@@ -19,7 +19,7 @@ button(3, function() menu:toggle() end)
 bar("top", 1,
     { widgets.tags, widgets.prompt() },
     { widgets.tasks },
-    { widgets.systray, widgets.clock("%H:%M"), widgets.layouts }
+    { widgets.systray, widgets.network("wlan0"), widgets.alsa, widgets.battery("BAT0"), widgets.clock("%H:%M"), widgets.layouts }
 )
 
 key("mod+r", function() prompt:run() end)

@@ -47,6 +47,17 @@ function theme(theme)
 end
 
 
+function first_line(f)
+    local fp = io.open(f)
+    if not fp
+    then
+        return nil
+    end
+
+    local content = fp:read("*l")
+    fp:close()
+    return content
+end
 
 
 modkey = "Mod4"
