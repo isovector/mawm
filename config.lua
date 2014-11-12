@@ -1,35 +1,71 @@
 theme "multicolor"
 
+
+-- Load a plugin from github
 plugin "Paamayim/mawm-core-widgets"
 
-require "default-key-bindings"
 
+-- Which layouts the user can choose, in order
 layout(layouts.fair)
 layout(layouts.tile)
 layout(layouts.tile.bottom)
+layout(layouts.max)
 layout(layouts.floating)
 
-modkey = "Mod4"
 
-tag { "www", "wksp1", "wksp2", "tools" }
+-- Simple tags with a default layout
+tag { "www", "wksp1", "wksp2" }
 
-menu = awful.menu({ items = { { "open terminal", "xterm" } } })
-button(3, function() menu:toggle() end)
+-- Use the max layout for this tag
+tag("tools", layouts.max)
 
+
+-- Create a menu and show it when right clicking on the desktop
+menu = awful.menu({ items = {
+    { "open terminal", "xterm" }
+} })
+button("3", function() menu:toggle() end)
+
+
+-- Create a bar across the top on screen 1
 bar("top", 1,
-    { widgets.tags, widgets.prompt() },
-    { widgets.tasks },
-    { widgets.systray, widgets.network("wlan0"), widgets.alsa, widgets.battery("BAT0"), widgets.clock("%H:%M"), widgets.layouts }
+    {   -- Left-aligned widgets
+        widgets.tags,
+        widgets.prompt()
+    },
+    {   -- Centered widgets
+        widgets.tasks
+    },
+    {   -- Right-aligned widgets
+        widgets.systray,
+        widgets.network("wlan0"),
+        widgets.alsa,
+        widgets.battery("BAT0"),
+        widgets.clock("%H:%M"),
+        widgets.layouts
+    }
 )
 
+
+-- Keysym to use for "mod" shortcuts
+modkey = "Mod4"
+
+-- Use the original awesome keybindings
+require "default-key-bindings"
+ukey("mod+shift+space") -- but remove backwards-switching through layouts
+
+-- Make mod+r run arbitrary programs
 key("mod+r", function() prompt:run() end)
 
-key("f", raise("luakit", "luakit", "www"))
-key("g", raise("gvim", "GVIM", "wksp1", "name"))
+-- raise() shows a program if it is running, or launches it otherwise
+key("mod+f", raise("luakit", "luakit", "www"))
+key("mod+g", raise("gvim", "GVIM", "wksp1", "name"))
 
+-- Run gvim on tag wksp1 when awesome starts
 start("gvim", "wksp1")
 
 
+-- Attach a signal to clients so the focused window has a highlighted border
 csignal("focus", function(c)
     c.border_color = beautiful.border_focus
 end)
