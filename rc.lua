@@ -1,13 +1,13 @@
-awful = require("awful")
+awful       = require("awful")
 awful.rules = require("awful.rules")
-require "awful.autofocus"
-naughty = require "naughty"
-wibox = require "wibox"
-beautiful = require "beautiful"
-gears = require "gears"
-lfs = require "lfs"
+              require "awful.autofocus"
+naughty     = require "naughty"
+wibox       = require "wibox"
+beautiful   = require "beautiful"
+gears       = require "gears"
+lfs         = require "lfs"
+html        = require "markup"
 
-html = require "markup"
 
 mawm = { }
 
@@ -345,6 +345,7 @@ layouts = awful.layout.suit
 
 -- Include user rc
 -- require "default"
+require "commands"
 require "config"
 
 tags = { }

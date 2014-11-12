@@ -2,16 +2,11 @@ key("ctrl+alt+Left",  awful.tag.viewprev)
 key("ctrl+alt+Right", awful.tag.viewnext)
 key("mod+grave",      awful.tag.history.restore)
 
-key("alt+Left",       function() lain.util.tag_view_nonempty(-1) end)
-key("alt+Right",      function() lain.util.tag_view_nonempty(1) end)
+key("mod+shift+j",    awful.client.movenext)
+key("mod+shift+k",    awful.client.moveprev)
 
--- layout manip
-key("mod+shift+j",    function() awful.client.swap.byidx(  1)    end)
-key("mod+shift+k",    function() awful.client.swap.byidx( -1)    end)
-
--- focus
-key("mod+ctrl+j",     function() awful.screen.focus_relative( 1) end)
-key("mod+ctrl+k",     function() awful.screen.focus_relative(-1) end)
+key("mod+ctrl+j",     awful.client.focusnext)
+key("mod+ctrl+k",     awful.client.focusprev)
 
 key("mod+u",
     function()
@@ -32,8 +27,8 @@ key("mod+shift+l",     function() awful.tag.incnmaster(-1)      end)
 key("mod+ctrl+h",      function() awful.tag.incncol( 1)         end)
 key("mod+ctrl+l",      function() awful.tag.incncol(-1)         end)
 
-key("mod+space",       function() awful.layout.inc(layouts,  1)  end)
-key("mod+shift+space", function() awful.layout.inc(layouts, -1)  end)
+key("mod+space",       awful.layout.next)
+key("mod+shift+space", awful.layout.prev)
 
 key("mod+ctrl+r",      awesome.restart)
 
@@ -75,19 +70,15 @@ for i = 1, 9 do
     end)
 end
 
-ckey("mod+F11",        function(c) c.fullscreen = not c.fullscreen  end)
+ckey("mod+F11",        awful.client.togglefull)
 ckey("mod+ctrl+space", awful.client.floating.toggle                     )
-ckey("alt+t",          function(c) c.ontop = not c.ontop            end)
-ckey("alt+F4",         function(c) c:kill() end)
-ckey("mod+m",          function(c)
-        c.maximized_horizontal = not c.maximized_horizontal
-        c.maximized_vertical   = not c.maximized_vertical
-end)
+ckey("alt+t",          awful.client.toggletop)
+ckey("alt+F4",         awful.client.close)
+ckey("mod+m",          awful.client.togglemax)
 
-cbutton("1",           function(c) client.focus = c; c:raise() end)
+cbutton("1",           awful.client.dofocus)
 cbutton("alt+1",       awful.mouse.client.move)
 cbutton("alt+3",       awful.mouse.client.resize)
 
--- DO ROR
 -- DO SIGNALS
 
