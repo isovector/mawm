@@ -29,3 +29,12 @@ key("g", raise("gvim", "GVIM", "wksp1", "name"))
 
 start("gvim", "wksp1")
 
+
+csignal("focus", function(c)
+    c.border_color = beautiful.border_focus
+end)
+
+csignal("unfocus", function(c)
+    c.border_color = beautiful.border_normal
+end)
+
