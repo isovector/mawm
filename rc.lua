@@ -7,9 +7,14 @@ beautiful   = require "beautiful"
 gears       = require "gears"
 lfs         = require "lfs"
 html        = require "markup"
+gearsobj    = require "gears.object"
 
 
 mawm = { }
+
+-- Variables
+
+notification_pos = "top_right"
 
 
 -- Setup env
@@ -19,6 +24,25 @@ local function get_tag(tagid)
 end
 
 system = awful.util.spawn_with_shell
+
+function notify(level, text, title, additional)
+    local prefs = { text = text, title = title, position = notification_pos }
+    if beautiful.notify_levels and beautiful.notify_levels[level] then
+        prefs.preset = beautiful.notify_levels[level]
+
+        if prefs.preset.position then
+            prefs.position = prefs.preset.position
+        end
+    end
+
+    prefs = awful.util.table.join(prefs, additional)
+
+    return naughty.notify(prefs)
+end
+
+function unotify(notification)
+    naughty.destroy(notification)
+end
 
 function launch(program, tagid)
     mawm.nextTag = get_tag(tagid)
@@ -57,6 +81,14 @@ function first_line(f)
     local content = fp:read("*l")
     fp:close()
     return content
+end
+
+function format(str, t)
+    for key, val in pairs(t) do
+        str = str:gsub(string.format("{%s}", key), val)
+    end
+
+    return str
 end
 
 
@@ -108,13 +140,44 @@ function plugin(repo)
     local name = string.gsub(repo, "/", "-")
     local root = string.format("%s/installed-plugins", awful.util.getdir("config"), name)
     local path = string.format("%s/%s", root, name)
+
     if not lfs.attributes(path) then
-        -- TODO: Show naughty messages
         os.execute("mkdir -p " .. root)
         os.execute(string.format("git clone https://github.com/%s.git %s", repo, path))
+        notify("system", "Finished installing plugin `" .. repo .. "'", "")
     end
 
     require(string.format("installed-plugins/%s/init", name))
+end
+
+mawm.signaler = gearsobj()
+function signal(signal, callback)
+    local root_signals = {
+        ["exit"] = true,
+        ["spawn::initiated"] = true,
+        ["spawn::change"] = true,
+        ["spawn::canceled"] = true,
+        ["spawn::timeout"] = true,
+        ["spawn::completed"] = true,
+        ["debug::error"] = true,
+        ["debug::deprecation"] = true,
+        ["debug::index::miss"] = true,
+        ["debug::newindex::miss"] = true,
+    }
+
+    if root_signals[signal] then
+        awesome.connect_signal(signal, callback)
+    else
+        mawm.signaler:connect_signal(signal, function(obj, ...) callback(...) end)
+    end
+end
+
+function register_signal(signal)
+    mawm.signaler:add_signal(signal)
+end
+
+function emit(signal, ...)
+    mawm.signaler:emit_signal(signal, ...)
 end
 
 
@@ -265,7 +328,6 @@ function start(program, tagid)
     table.insert(mawm.start, { program, tagid })
 end
 
-signal = awesome.connect_signal
 csignal = client.connect_signal
 
 -- Install tag spawning support

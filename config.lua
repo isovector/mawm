@@ -31,6 +31,9 @@ button("3", function() menu:toggle() end)
 bar("top", 1,
     {   -- Left-aligned widgets
         widgets.tags,
+        widgets.cmus(function(state)
+            return format("{status}: {artist} - {title}", state)
+        end),
         widgets.prompt()
     },
     {   -- Centered widgets
@@ -64,6 +67,14 @@ key("mod+g", raise("gvim", "GVIM", "wksp1", "name"))
 -- Run gvim on tag wksp1 when awesome starts
 start("gvim", "wksp1")
 
+notification_pos = "bottom_right"
+signal("cmus", function(state)
+    notify(
+        "cmus",
+        format("{artist} [{album}] - {date}\n{title}", state),
+        "Now Playing"
+    )
+end)
 
 -- Attach a signal to clients so the focused window has a highlighted border
 csignal("focus", function(c)
