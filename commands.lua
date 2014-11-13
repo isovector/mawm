@@ -3,7 +3,7 @@ awful.client.togglemax  = function(c)
     c.maximized_horizontal = not c.maximized_horizontal
     c.maximized_vertical   = not c.maximized_vertical
 end
-awful.client.close      = function(c) c:kill() end
+awful.client.close      = method(nil, "kill")
 awful.client.toggletop  = function(c) c.ontop = not c.ontop end
 awful.client.togglefull = function(c) c.fullscreen = not c.fullscreen end
 awful.client.focusprev  = function() awful.screen.focus_relative(-1) end

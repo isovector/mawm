@@ -58,6 +58,14 @@ function launch1(cmd)
     awful.util.spawn_with_shell("pgrep -u $USER -x " .. findme .. " > /dev/null || (" .. cmd .. ")")
 end
 
+function method(obj, method, ...)
+    local args = { ... }
+    return function(c)
+        obj = obj or c
+        return obj[method](obj, unpack(args))
+    end
+end
+
 
 function theme(theme)
     local path = string.format("%s/themes/%s/theme.lua", awful.util.getdir("config"), theme)
@@ -83,7 +91,12 @@ function first_line(f)
     return content
 end
 
-function format(str, t)
+function format(str, t, ...)
+    local args = { ... }
+    if #args then
+        str = string.format(str, unpack(args))
+    end
+
     for key, val in pairs(t) do
         str = str:gsub(string.format("{%s}", key), val)
     end
@@ -135,6 +148,7 @@ local function join(t)
 end
 
 widgets = { }
+commands = { }
 -- Plugins
 function plugin(repo)
     local name = string.gsub(repo, "/", "-")
