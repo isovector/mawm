@@ -10,6 +10,31 @@ html        = require "markup"
 gearsobj    = require "gears.object"
 
 
+
+            if awesome.startup_errors then
+                naughty.notify({ preset = naughty.config.presets.critical,
+                                 title = "Oops, there were errors during startup!",
+                                 text = awesome.startup_errors })
+            end
+
+            do
+                local in_error = false
+                awesome.connect_signal("debug::error", function (err)
+                    if in_error then return end
+                    in_error = true
+
+                    naughty.notify({ preset = naughty.config.presets.critical,
+                                     title = "Oops, an error happened!",
+                                     text = err })
+                    in_error = false
+                end)
+            end
+
+            os.setlocale(os.getenv("LANG"))
+
+
+
+
 mawm = { }
 
 -- Variables
@@ -25,7 +50,8 @@ end
 
 system = awful.util.spawn_with_shell
 
-function notify(level, text, title, additional)
+mawm.notifications = { }
+function notify(level, text, title, additional, name)
     local prefs = { text = text, title = title, position = notification_pos }
     if beautiful.notify_levels and beautiful.notify_levels[level] then
         prefs.preset = beautiful.notify_levels[level]
@@ -37,7 +63,17 @@ function notify(level, text, title, additional)
 
     prefs = awful.util.table.join(prefs, additional)
 
-    return naughty.notify(prefs)
+    if name then
+        unotify(mawm.notifications[name])
+    end
+
+    local notif = naughty.notify(prefs)
+
+    if name then
+        mawm.notifications[name] = notif
+    end
+
+    return notif
 end
 
 function unotify(notification)
@@ -104,8 +140,15 @@ function format(str, t, ...)
     return str
 end
 
+mawm.modkeys = { }
+function modkey(name, keysym)
+    mawm.modkeys[name] = keysym
+end
 
-modkey = "Mod4"
+modkey("alt", "Mod1")
+modkey("ctrl", "Control")
+modkey("shift", "Shift")
+
 local function parse_shortcut(method, short, cmd)
     local mods = { }
     local key = nil
@@ -115,14 +158,8 @@ local function parse_shortcut(method, short, cmd)
             table.insert(mods, key)
         end
 
-        if token == "mod" then
-            key = modkey
-        elseif token == "alt" then
-            key = "Mod1"
-        elseif token == "ctrl" then
-            key = "Control"
-        elseif token == "shift" then
-            key = "Shift"
+        if mawm.modkeys[token] then
+            key = mawm.modkeys[token]
         else
             key = token
         end
@@ -242,19 +279,11 @@ gen_glob_client_raw("key")
 gen_glob_client_raw("button")
 
 
-awful.rules.rules = -- Default rule
-    {   rule = { },
-        properties = {  keys = join(mawm.ckeys),
-                        buttons = join(mawm.cbuttons),
-                        focus = awful.client.focus.filter,
-                        raise = true,
-        }
-    }
 function rule()
 end
 
 mawm.nextTag = nil
-function raise(cmd, val, tagid, prop)
+function commands.raise(cmd, val, tagid, prop)
     prop = prop or "class"
 
     return function()
@@ -431,6 +460,9 @@ if loaded then
     loaded()
 end
 
+-- Give a useful WM name for java
+start("wmname LG3D")
+
 local loadHandler = { cancel = false }
 emit("mawm::load_config", loadHandler)
 if not loadHandler.cancel then
@@ -447,6 +479,16 @@ for s = 1, screen.count() do
     end
 end
 
+awful.rules.rules = { -- Default rule
+    {   rule = { },
+        properties = {  keys = join(mawm.ckeys),
+                        buttons = join(mawm.cbuttons),
+                        focus = awful.client.focus.filter,
+                        raise = true,
+        }
+    }
+}
+
 -- Mapping installers
 root.buttons(join(mawm.gbuttons))
 root.keys(join(mawm.gkeys))
@@ -456,7 +498,7 @@ for i, tup in ipairs(mawm.start) do
     local program = tup[1]
     local tagid = tup[2]
 
-    if tag then
+    if tagid then
         launch(program, tagid)
     else
         launch1(program)

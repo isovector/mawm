@@ -8,17 +8,7 @@ key("mod+shift+k",    awful.client.moveprev)
 key("mod+ctrl+j",     awful.client.focusnext)
 key("mod+ctrl+k",     awful.client.focusprev)
 
-key("mod+u",
-    function()
-        urgent  = awful.client.urgent.get()
-        if urgent then
-            awful.client.movetotag(
-                awful.tag.selected(1),
-            urgent)
-            client.focus = urgent
-            urgent:raise()
-        end
-end)
+key("mod+u",          awful.client.focusurgent)
 
 key("mod+l",           function() awful.tag.incmwfact( 0.05)    end)
 key("mod+h",           function() awful.tag.incmwfact(-0.05)    end)
@@ -32,13 +22,7 @@ key("mod+shift+space", awful.layout.prev)
 
 key("mod+ctrl+r",      awesome.restart)
 
--- tab shifting
-key("alt+Tab",         function()
-    awful.client.focus.byidx(-1)
-    if client.focus then
-        client.focus:raise()
-    end
-end)
+key("alt+Tab",         awful.client.cycle)
 
 
 for i = 1, 9 do
@@ -71,7 +55,7 @@ for i = 1, 9 do
 end
 
 ckey("mod+F11",        awful.client.togglefull)
-ckey("mod+ctrl+space", awful.client.floating.toggle                     )
+ckey("mod+ctrl+space", awful.client.floating.toggle)
 ckey("alt+t",          awful.client.toggletop)
 ckey("alt+F4",         awful.client.close)
 ckey("mod+m",          awful.client.togglemax)
@@ -79,6 +63,4 @@ ckey("mod+m",          awful.client.togglemax)
 cbutton("1",           awful.client.dofocus)
 cbutton("alt+1",       awful.mouse.client.move)
 cbutton("alt+3",       awful.mouse.client.resize)
-
--- DO SIGNALS
 

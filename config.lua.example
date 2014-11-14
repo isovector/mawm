@@ -51,7 +51,8 @@ bar("top", 1,
 
 
 -- Keysym to use for "mod" shortcuts
-modkey = "Mod4"
+modkey("mod", "Mod4")
+
 
 -- Use the original awesome keybindings
 require "default-key-bindings"
