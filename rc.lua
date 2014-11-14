@@ -279,7 +279,23 @@ gen_glob_client_raw("key")
 gen_glob_client_raw("button")
 
 
-function rule()
+awful.rules.rules = { }
+
+function rule(match, name, callback, ...)
+    local t = { ... }
+    local props = { }
+
+    for i = 1, #t, 2 do
+        props[t[i]] = t[i + 1]
+    end
+
+    table.insert(awful.rules.rules, {
+        rule = {
+            [match] = name
+        },
+        callback = callback,
+        properties = props
+    })
 end
 
 mawm.nextTag = nil
@@ -295,9 +311,7 @@ function commands.raise(cmd, val, tagid, prop)
 
         --make an array of matched clients
         for i, c in pairs(clients) do
-            print "trying"
-            if c[prop] ~= val and (c[prop] == val or c[prop]:find(val)) then
-                print "got a match!"
+            if c[prop] == val or c[prop]:find(val) then
                 n = n + 1
                 matched_clients[n] = c
                 if c == focused then
@@ -469,6 +483,17 @@ if not loadHandler.cancel then
     require "config"
 end
 
+-- Add default buttons and keys to clients
+table.insert(awful.rules.rules, 1,
+{   rule = { },
+    properties = {
+        keys = join(mawm.ckeys),
+        buttons = join(mawm.cbuttons),
+        focus = awful.client.focus.filter,
+        raise = true,
+    }
+})
+
 
 tags = { }
 for s = 1, screen.count() do
@@ -479,15 +504,15 @@ for s = 1, screen.count() do
     end
 end
 
-awful.rules.rules = { -- Default rule
-    {   rule = { },
-        properties = {  keys = join(mawm.ckeys),
-                        buttons = join(mawm.cbuttons),
-                        focus = awful.client.focus.filter,
-                        raise = true,
-        }
-    }
-}
+-- Transform tag strings into real tags
+for _, rule in ipairs(awful.rules.rules) do
+    local props = rule.properties
+    if props then
+        if type(props.tag) == "string" then
+            props.tag = get_tag(props.tag)
+        end
+    end
+end
 
 -- Mapping installers
 root.buttons(join(mawm.gbuttons))
