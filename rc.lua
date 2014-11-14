@@ -347,18 +347,18 @@ csignal = client.connect_signal
 -- Install tag spawning support
 mawm.clientsToSpawn = 0
 csignal("manage", function(c)
-        local tag = mawm.nextTag
-        if tag then
-            awful.client.movetotag(tag, c)
+    local tag = mawm.nextTag
+    if tag then
+        awful.client.movetotag(tag, c)
 
-            if mawm.clientsToSpawn == 0 then
-                -- suppress changing tags if we are starting up
-                awful.tag.viewonly(tag)
-            else
-                mawm.clientsToSpawn = mawm.clientsToSpawn - 1
-            end
-            mawm.nextTag = nil
+        if mawm.clientsToSpawn == 0 then
+            -- suppress changing tags if we are starting up
+            awful.tag.viewonly(tag)
+        else
+            mawm.clientsToSpawn = mawm.clientsToSpawn - 1
         end
+        mawm.nextTag = nil
+    end
 end)
 
 
@@ -418,11 +418,25 @@ end
 layouts = awful.layout.suit
 
 
-
 -- Include user rc
 -- require "default"
 require "commands"
-require "config"
+
+register_signal("mawm::load_config")
+
+
+-- Allow plugins to hijack config loading
+local loaded = loadfile "early-hooks.lua"
+if loaded then
+    loaded()
+end
+
+local loadHandler = { cancel = false }
+emit("mawm::load_config", loadHandler)
+if not loadHandler.cancel then
+    require "config"
+end
+
 
 tags = { }
 for s = 1, screen.count() do
