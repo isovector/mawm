@@ -1,5 +1,6 @@
+awful.client.center       = function(c) awful.placement.centered(c, nil) end
 awful.client.dofocus      = function(c) client.focus = c; c:raise() end
-awful.client.togglemax  = function(c)
+awful.client.togglemax    = function(c)
     c.maximized_horizontal = not c.maximized_horizontal
     c.maximized_vertical   = not c.maximized_vertical
 end
