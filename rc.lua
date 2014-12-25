@@ -80,6 +80,13 @@ function unotify(notification)
     naughty.destroy(notification)
 end
 
+function every(time, func)
+    local updater = timer({ timeout = time })
+    updater:connect_signal("timeout", func)
+    updater:start()
+    return updater
+end
+
 function launch(program, tagid)
     mawm.nextTag = get_tag(tagid)
     awful.util.spawn(program)
@@ -108,9 +115,13 @@ function theme(theme)
     beautiful.init(path)
 
     if beautiful.wallpaper then
-        for s = 1, screen.count() do
-            gears.wallpaper.maximized(beautiful.wallpaper, s, true)
-        end
+        wallpaper(beautiful.wallpaper)
+    end
+end
+
+function wallpaper(wall)
+    for s = 1, screen.count() do
+        gears.wallpaper.maximized(wall, s, true)
     end
 end
 
